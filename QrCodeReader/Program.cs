@@ -15,7 +15,8 @@ namespace QrCodeReader
         private static void Main(string[] args)
         {
             //      CreateQrCode();
-            var img = GetImages(@"C:\Users\yb\Desktop\Von GEF 1.pdf");
+            var fullPath = Path.Combine(Environment.CurrentDirectory, @"..\..\..\Von GEF 1.pdf");
+            var img = GetImages(fullPath);
             var test = ReadQrCode(img);
         }
 
