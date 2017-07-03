@@ -25,14 +25,15 @@ namespace QrCodeReader
             _path = Path.Combine(Environment.CurrentDirectory, @"..\..\..\");
             //var fullPath1 = Path.Combine(_path, "Von GEF 1.pdf");
             //var fullPath1 = Path.Combine(_path, "Von Itree 1.pdf");
-            //var code = ReadQRCodeFromPdf(fullPath1);
-            var imgPath = Path.Combine(_path, @"extracted\Image14.jpg");
-            Bitmap bitmap;
-            using (var fs = File.OpenRead(imgPath))
-            {
-                bitmap = new Bitmap(fs);
-            }
-            var code = ReadQrCode(bitmap);
+            var fullPath1 = Path.Combine(_path, "Von Afi 1.pdf");
+            var code = ReadQRCodeFromPdf(fullPath1);
+            //var imgPath = Path.Combine(_path, @"extracted\Image14.jpg");
+            //Bitmap bitmap;
+            //using (var fs = File.OpenRead(imgPath))
+            //{
+            //    bitmap = new Bitmap(fs);
+            //}
+            //var code = ReadQrCode(bitmap);
             Console.WriteLine();
             Console.WriteLine(code);
             Console.WriteLine();
