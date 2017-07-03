@@ -1,26 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using FreeImageAPI;
+using iTextSharp.text.pdf;
+using iTextSharp.text.pdf.parser;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
+using Path = System.IO.Path;
 
 namespace QrCodeReader
 {
     internal class Program
     {
+        private static string _path;
+
         private static void Main(string[] args)
         {
             //      CreateQrCode();
-            var fullPath = Path.Combine(Environment.CurrentDirectory, @"..\..\..\Von GEF 1.pdf");
-            var img = GetImages(fullPath);
-            var test = ReadQrCode(img);
+            _path = Path.Combine(Environment.CurrentDirectory, @"..\..\..\");
+            //var fullPath1 = Path.Combine(_path, "Von GEF 1.pdf");
+            //var fullPath1 = Path.Combine(_path, "Von Itree 1.pdf");
+            //var code = ReadQRCodeFromPdf(fullPath1);
+            var imgPath = Path.Combine(_path, @"extracted\Image14.jpg");
+            Bitmap bitmap;
+            using (var fs = File.OpenRead(imgPath))
+            {
+                bitmap = new Bitmap(fs);
+            }
+            var code = ReadQrCode(bitmap);
+            Console.WriteLine();
+            Console.WriteLine(code);
+            Console.WriteLine();
+            //var fullPath2 = Path.Combine(_path, "Von GEF 1.pdf");
+            //var img2 = GetImages(fullPath2);
+            //var fileName = "affolter.NET.Test.jpg";
+            //CreateQrCode("C2001C57-5297-42F1-ADCC-0F98DA10836F;Verfuegung;2016", fileName);
+            //var result = ReadQrCode(fileName);
+            Console.ReadKey();
         }
 
-        private static void CreateQrCode()
+        private static void CreateQrCode(string contents, string fileName)
         {
             IBarcodeWriter writer = new BarcodeWriter
             {
@@ -33,12 +57,13 @@ namespace QrCodeReader
                 }
             };
             Bitmap aztecBitmap;
-            var result = writer.Write("C2001C57-5297-42F1-ADCC-0F98DA10836F;Verfuegung;2016");
-            aztecBitmap = new Bitmap(result);
-            var bitmap = ResizeImage(aztecBitmap, 70, 70);
+            var result = writer.Write(contents);
+            SaveImage(result, Path.Combine(_path, fileName));
+            //aztecBitmap = new Bitmap(result);
+            //var bitmap = ResizeImage(aztecBitmap, 70, 70);
 
-            SaveImage(aztecBitmap, @"C:\Temp\test1.jpg");
-            SaveImage(bitmap, @"C:\Temp\test2.jpg");
+            //SaveImage(aztecBitmap, Path.Combine(_path, "test1.jpg"));
+            //SaveImage(bitmap, Path.Combine(_path, "test2.jpg"));
         }
 
         public static Bitmap CropImage(Image source, Rectangle section)
@@ -75,8 +100,53 @@ namespace QrCodeReader
             return (byte[]) converter.ConvertTo(img, typeof (byte[]));
         }
 
-        
-        private static Image GetImages(string filename)
+        public static Image ByteArrayToImage(byte[] byteArrayIn)
+        {
+            var converter = new ImageConverter();
+            var img = (Image)converter.ConvertFrom(byteArrayIn);
+            return img;
+        }
+
+        private static string ReadQRCodeFromPdf(string filename)
+        {
+            FileStream fs = File.OpenRead(filename);
+            PdfReader reader = new PdfReader(fs);
+            PdfReaderContentParser parser = new PdfReaderContentParser(reader);
+            var listener = new BetterImageRenderListener();
+            for (int i = 1; i <= reader.NumberOfPages; i++)
+            {
+                parser.ProcessContent(i, listener);
+            }
+
+            // delete all existing
+            var filePath = Path.Combine(_path, "extracted");
+            var dir = Directory.CreateDirectory(filePath);
+            foreach (var fi in dir.GetFiles()){
+                fi.Delete();
+            }
+
+            for (int i = 0; i < listener.Count; ++i)
+            {
+                var img = listener[i];
+                
+                var path = Path.Combine(filePath, img.Name);
+                Bitmap btmap;
+                using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    btmap = img.GetBitmap();
+                    btmap.Save(stream, ImageFormat.Jpeg);
+                }
+                Console.WriteLine(img.Name);
+                var result = ReadQrCode(btmap);
+                if (!string.IsNullOrWhiteSpace(result?.Text))
+                {
+                    return result.Text;
+                }
+            }
+            return string.Empty;
+        }
+
+        private static Image GetImages2(string filename)
         {
 
             FileStream fs = File.OpenRead(filename);
@@ -102,6 +172,11 @@ namespace QrCodeReader
                     if ((PDFObj != null) && PDFObj.IsStream())
                     {
                         PDFStremObj = (iTextSharp.text.pdf.PdfStream)PDFObj;
+                        PdfObject filterType = PDFStremObj.Get(PdfName.FILTER);
+                        if (filterType.Equals(PdfName.JBIG2DECODE))
+                        {
+                            //... it will not work
+                        }
                         iTextSharp.text.pdf.PdfObject subtype = PDFStremObj.Get(iTextSharp.text.pdf.PdfName.SUBTYPE);
 
                         if ((subtype != null) && subtype.ToString() == iTextSharp.text.pdf.PdfName.IMAGE.ToString())
@@ -112,14 +187,24 @@ namespace QrCodeReader
                             {
                                 try
                                 {
-                                    System.IO.MemoryStream MS = new System.IO.MemoryStream(bytes);
+                                    var img = ByteArrayToImage(bytes);
+                                    ImgList.Add(img);
+                                    //System.IO.MemoryStream MS = new System.IO.MemoryStream(bytes);
 
-                                    MS.Position = 0;
+                                    //MS.Position = 0;
 
-                                    FIBITMAP dib = FreeImage.LoadFromStream(MS, FREE_IMAGE_LOAD_FLAGS.JPEG_FAST);
+                                    FIBITMAP dib = FreeImage.LoadEx("test.jp2");
+                                    ////save the image out to disk    
+                                    //FreeImage.Save(FREE_IMAGE_FORMAT.FIF_JPEG, dib, "test.jpg", FREE_IMAGE_SAVE_FLAGS.JPEG_QUALITYNORMAL);
+                                    //or even turn it into a normal Bitmap for later use
                                     Bitmap bitmap = FreeImage.GetBitmap(dib);
 
-                                    
+                                    ////FIBITMAP dib = FreeImage.LoadFromStream(MS, FREE_IMAGE_LOAD_FLAGS.JPEG_FAST);
+                                    ////Bitmap bitmap = FreeImage.GetBitmap(dib);
+
+                                    //System.Drawing.Image ImgPDF = System.Drawing.Image.FromStream(MS);
+
+                                    //ImgList.Add(ImgPDF);
                                 }
                                 catch (Exception ex)
                                 {
@@ -238,32 +323,33 @@ namespace QrCodeReader
             return null;
         }
 
-        private static Result ReadQrCode(Image img)
+        private static Bitmap LoadImage(string fileName)
         {
-            var uri = new Uri(@"C:\Temp\test1.jpg");
+            var path = Path.Combine(_path, fileName);
             Bitmap image;
             try
             {
-                image = (Bitmap) img;
+                image = new Bitmap(path);
             }
             catch (Exception)
             {
-                throw new FileNotFoundException("Resource not found: " + uri);
+                throw new FileNotFoundException("Resource not found: " + path);
             }
+            return image;
+        }
 
+        private static Result ReadQrCode(Bitmap image)
+        {
             using (image)
             {
-                LuminanceSource source;
-                source = new BitmapLuminanceSource(image);
-                var bitmap = new BinaryBitmap(new HybridBinarizer(source));
-                var result = new MultiFormatReader().decode(bitmap);
-                if (result != null)
+                LuminanceSource source = new BitmapLuminanceSource(image);
+                var binarizer = new HybridBinarizer(source);
+                var bitmap = new BinaryBitmap(binarizer);
+                var reader = new QRCodeReader();
+                var result = reader.decode(bitmap);
+                if (result == null)
                 {
-                    var test = result;
-                }
-                else
-                {
-                    var test = result;
+                    result = new MultiFormatReader().decode(bitmap);
                 }
                 return result;
             }

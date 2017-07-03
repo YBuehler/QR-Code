@@ -66,3 +66,5 @@ src/AVG.Web/App_Data/*
 *.testresult.xml
 src/AVG.Charting.Prototype/node_modules/**/*
 !src/AVG.Charting.Prototype/node_modules/dummy.txt
+Backup/
+extracted/
