@@ -36,7 +36,6 @@ src/cmn.Dlls/*
 NuGetPackages/
 src/BuildOutput/
 !src/.nuget/NuGet.exe
-dist/
 spa/js/lib/
 spa/node_modules
 spa/build/node_modules/
