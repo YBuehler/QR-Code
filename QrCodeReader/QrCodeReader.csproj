@@ -35,27 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="itext.barcodes">
-      <HintPath>..\packages\itext7.7.0.2.2\lib\net40\itext.barcodes.dll</HintPath>
-    </Reference>
-    <Reference Include="itext.forms">
-      <HintPath>..\packages\itext7.7.0.2.2\lib\net40\itext.forms.dll</HintPath>
-    </Reference>
-    <Reference Include="itext.io">
-      <HintPath>..\packages\itext7.7.0.2.2\lib\net40\itext.io.dll</HintPath>
-    </Reference>
-    <Reference Include="itext.kernel">
-      <HintPath>..\packages\itext7.7.0.2.2\lib\net40\itext.kernel.dll</HintPath>
-    </Reference>
-    <Reference Include="itext.layout">
-      <HintPath>..\packages\itext7.7.0.2.2\lib\net40\itext.layout.dll</HintPath>
-    </Reference>
-    <Reference Include="itext.pdfa">
-      <HintPath>..\packages\itext7.7.0.2.2\lib\net40\itext.pdfa.dll</HintPath>
-    </Reference>
-    <Reference Include="itext.sign">
-      <HintPath>..\packages\itext7.7.0.2.2\lib\net40\itext.sign.dll</HintPath>
-    </Reference>
     <Reference Include="itextsharp">
       <HintPath>..\packages\iTextSharp.5.5.11\lib\itextsharp.dll</HintPath>
     </Reference>
