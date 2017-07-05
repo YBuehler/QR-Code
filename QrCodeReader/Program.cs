@@ -23,9 +23,9 @@ namespace QrCodeReader
         {
             //      CreateQrCode();
             _path = Path.Combine(Environment.CurrentDirectory, @"..\..\..\");
-            var fullPath1 = Path.Combine(_path, "Von GEF 1.pdf");
+            //var fullPath1 = Path.Combine(_path, "Von GEF 1.pdf");
             //var fullPath1 = Path.Combine(_path, "Von Itree 1.pdf");
-            //var fullPath1 = Path.Combine(_path, "Von Afi 1.pdf");
+            var fullPath1 = Path.Combine(_path, "Von Afi 1.pdf");
             var code = ReadQRCodeFromPdf(fullPath1);
             //var imgPath = Path.Combine(_path, @"extracted\Image14.jpg");
             //Bitmap bitmap;
@@ -345,6 +345,7 @@ namespace QrCodeReader
             {
                 var reader = new BarcodeReader
                 {
+                    AutoRotate = true,
                     Options = {TryHarder = true}
                 };
                 var result = reader.Decode(image);
